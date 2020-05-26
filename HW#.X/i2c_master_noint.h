@@ -18,4 +18,10 @@ unsigned char i2c_master_recv(void); // receive a byte of date
 void i2c_master_ack(int val); // send an ACk (0) or NACk (1))
 void i2c_master_stop(void); // send a stop
 
+// functions made by scott
+
+void i2c_init(void); // initializes the mcp23017 
+unsigned char i2c_read(void); // for reading from mcp
+void i2c_write(int in); // for writing to mcp
+
 #endif

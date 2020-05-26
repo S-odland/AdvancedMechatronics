@@ -99,6 +99,50 @@ void i2c_master_stop(void) { // send a STOP:
     } // wait for STOP to complete
 }
 
+void i2c_init(){
+    
+    i2c_master_setup();
+    
+    // LED output
+    i2c_master_start(); // sends start bit
+    i2c_master_send(0b01000000); // sends a write bit
+    i2c_master_send(0x00); // send register
+    i2c_master_send(0x00); // set output
+    i2c_master_stop();
+    
+    // push button input
+    i2c_master_start(); // sends start bit
+    i2c_master_send(0b01000000); // sends a write bit
+    i2c_master_send(0x01); // send register
+    i2c_master_send(0xFF); // set input
+    i2c_master_stop();
+    
+}
+
+void i2c_write(int in){
+    
+    i2c_master_start();
+    i2c_master_send(0b01000000);
+    i2c_master_send(0x14);
+    i2c_master_send(in);
+    i2c_master_stop();
+}
+
+unsigned char i2c_read(){
+    
+    i2c_master_start();
+    i2c_master_send(0b01000000);
+    i2c_master_send(0x13);
+    i2c_master_restart();
+    i2c_master_send(0b01000001);
+    unsigned char data = i2c_master_recv();
+    i2c_master_ack(1);
+    i2c_master_stop();
+    
+    return data;
+    
+}
+
 int main() {
 
     __builtin_disable_interrupts(); // disable interrupts while initializing things
@@ -117,25 +161,26 @@ int main() {
 
     // do your TRIS and LAT commands here
     TRISAbits.TRISA4 = 0;
-    TRISBbits.TRISB4 = 1;
     LATAbits.LATA4 = 0;
     
-    //i2c_master_setup();
+    i2c_init();
     
     __builtin_enable_interrupts();
-   
+    
+    
     while (1) {
-        if (PORTBbits.RB4 == 1){
-            LATAbits.LATA4 = 1;
-            _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 2400000/1.5){}
-            LATAbits.LATA4 = 0;
-            _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 2400000/1.5){}
-            LATAbits.LATA4 = 1;
-            _CP0_SET_COUNT(0);
-            while(_CP0_GET_COUNT() < 2400000/1.5){}
-            LATAbits.LATA4 = 0; 
+        LATAbits.LATA4 = !LATAbits.LATA4;
+        
+        unsigned char button_push = i2c_read()%2;
+        
+        if (button_push){
+            i2c_write(0x00);
+        } else {
+            i2c_write(0xFF);
         }
+   
+        // delays so the light changes every 10th-ish of a second
+        _CP0_SET_COUNT(0);
+        while(_CP0_GET_COUNT() < 24000000/10){}
     }
 }
