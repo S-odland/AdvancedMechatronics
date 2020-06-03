@@ -1,23 +1,20 @@
-/* 
- * File:   ws2812b.h
- * Author: scott
- *
- * Created on June 2, 2020, 5:59 PM
- */
 
-#ifndef WS2812B_H
-#define	WS2812B_H
+#ifndef WS2812B_H__
+#define WS2812B_H__
 
-#ifdef	__cplusplus
-extern "C" {
+#include<xc.h> // processor SFR definitions
+#include "ssd1306.h"
+
+// link three 8bit colors together
+typedef struct {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+} wsColor; 
+
+void ws2812b_setup();
+void ws2812b_setColor(wsColor*,int);
+wsColor HSBtoRGB(float hue, float sat, float brightness);
+
 #endif
-
-
-
-
-#ifdef	__cplusplus
-}
-#endif
-
-#endif	/* WS2812B_H */
 
