@@ -117,26 +117,25 @@ int main() {
         int rBuf4 = 0,aBuf4 = 0;
         
         for (j = 0; j < 9; j++){
-            for (i = 0; i < 20; i++){
-                rBuf5 += ctmu_read(5,48000000/4000);
+            for (i = 0; i < 12; i++){
+                rBuf5 += ctmu_read(5,48000000/15000);
+                rBuf4 += ctmu_read(4,48000000/15000);
             }
             aBuf5 += rBuf5/20;
-        }
-        for (j = 0; j < 9; j++){
-            for (i = 0; i < 20; i++){
-                rBuf4 += ctmu_read(4,48000000/4000);
-            }
             aBuf4 += rBuf4/20;
         }
         
-        if (aBuf5 < 45900){
+        if (aBuf5 < 27560){
             i2c_write(0b01000000,0xFF,0x14);
 
-        } else if (aBuf4 < 45900) {
+        } else {
+            i2c_write(0b01000000,0x00,0x14);
+        }
+        if (aBuf4 < 27560) {
             i2c_write(0b01000000,0xFF,0x15);
         } else {
             i2c_write(0b01000000,0x00,0x15);
-            i2c_write(0b01000000,0x00,0x14);
+            
         }
         
         ssd1306_clear();
@@ -150,9 +149,9 @@ int main() {
 //        sprintf(message,"a: %d %d %d",xlxData,xlyData,xlzData);
 //        drawString(message,5,15);
         
-        sprintf(message,"G-Clip: %d",aBuf5);
+        sprintf(message,"Yellow: %d",aBuf5);
         drawString(message,5,5);
-        sprintf(message,"B-Clip: %d",aBuf4);
+        sprintf(message,"Green: %d",aBuf4);
         drawString(message,5,15);
         
 //        bar_y(xlxData);
