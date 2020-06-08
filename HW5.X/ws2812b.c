@@ -4,8 +4,9 @@
 // other includes if necessary for debugging
 
 // Timer2 delay times, you can tune these if necessary
-#define LOWTIME 150 // number of 48MHz cycles to be low for 0.35uS
-#define HIGHTIME 650 // number of 48MHz cycles to be high for 1.65uS
+#define LOWTIME 1300 // number of 48MHz cycles to be low for 0.35uS
+#define HIGHTIME 6300 // number of 48MHz cycles to be high for 1.65uS
+
 
 // setup Timer2 for 48MHz, and setup the output pin
 void ws2812b_setup() {
@@ -29,7 +30,15 @@ void ws2812b_setColor(wsColor * c, int numLEDs) {
     delay_times[0] = 0;
     
     int nB = 1; // which high/low bit you are storing, 2 per color bit, 24 color bits per WS2812B
-	
+    
+    char message[50];
+	sprintf(message,"HIGHTIME = %d",HIGHTIME);
+    drawString(message,5,20);
+    ssd1306_update(); 
+    sprintf(message,"LOWTIME = %d",LOWTIME);
+    drawString(message,5,5);
+    ssd1306_update();
+    
     // loop through each WS2812B
     for (i = 0; i < numLEDs; i++) {
         // loop through each color bit, MSB first
@@ -198,42 +207,38 @@ int main() {
     
     __builtin_enable_interrupts();
     
-    char message[50];
-    _CP0_SET_COUNT(0);
-    int i = 0;
-    int seconds = 0;
-    int fps;
-    int time;
     
-    wsColor c;
-    wsColor * co;
-    //c = HSBtoRGB(360,1,0);
-    c.r = 0;
-    c.b = 0;
-    c.g = 0;
-    co = &c;
-   
-    ws2812b_setColor(co,4);
-    
-    while (1) {      
+    while(1){
+        char message[50];
+        _CP0_SET_COUNT(0);
+
+        wsColor c[1];
+        wsColor * co;
+        //c = HSBtoRGB(360,1,0);
+        c[0].r = 255;
+        c[0].b = 255;
+        c[0].g = 255;
+        co = c;
+
+        ws2812b_setColor(co,4);
         
-        sprintf(message,"i = %d",i);
-        i++;
-        drawString(message,5,5);
-        ssd1306_update();
-        
-        time = _CP0_GET_COUNT();
-        seconds = time/48000000;
-        if (seconds != 0){
-            fps = i / seconds;
-        }
-        
-        sprintf(message,"Time Elapsed = %d",seconds);
-        drawString(message,5,15);
-        ssd1306_update();
-        
-        sprintf(message,"FPS = %1.4d",fps);
-        drawString(message,5,25);
-        ssd1306_update();
+        LATAbits.LATA4 = !LATAbits.LATA4;
+         _CP0_SET_COUNT(0);
+        while(_CP0_GET_COUNT() < 2400000){;}
     }
+//    while(1){
+//        for (HIGHTIME = 59; HIGHTIME < 70; HIGHTIME  = HIGHTIME++){
+//            ws2812b_setColor(co,4);
+//            _CP0_SET_COUNT(0);
+//            while(_CP0_GET_COUNT() < 24000000/1.5){;}
+//            for (LOWTIME = 10; LOWTIME < 20; LOWTIME = LOWTIME++){
+//                sprintf(message,"LT = %d",LOWTIME);
+//                drawString(message,70,5);
+//                ssd1306_update();
+//                ws2812b_setColor(co,4);
+//                _CP0_SET_COUNT(0);
+//                while(_CP0_GET_COUNT() < 24000000/1.5){;}
+//            }
+//        }
+//    }
 }

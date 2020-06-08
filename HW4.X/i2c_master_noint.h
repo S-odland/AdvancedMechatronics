@@ -9,6 +9,7 @@
 #define	I2C_MASTER_NOINT_H
 
 #include <xc.h>
+#include <stdio.h>
 
 void i2c_master_steup(void); // set up I@C1 as a master
 void i2c_master_start(void); // send a START signal
